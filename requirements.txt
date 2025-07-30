@@ -1,0 +1,7 @@
+tk
+numpy
+soundfile
+pyaudio
+speechrecognition
+pycryptodome
+cryptography
