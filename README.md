@@ -22,7 +22,7 @@ A simple GUI-based text encryption and decryption tool using voice features for 
     - Click the **Decrypt** button..
     - The app retrieves the stored keys and decrypts the text.
 
-## File Structure
+## File Structure 
 - `main.py`: Main entry point
 - `gui.py`: Main GUI application
 - `audio_utils.py`: Handles audio recording and feature extraction
