@@ -19,7 +19,7 @@ A simple GUI-based text encryption and decryption tool using voice features for 
 
 2. **Decrypting Text**:
     - Paste the encrypted text in the text box.
-    - Click the **Decrypt** button.
+    - Click the **Decrypt** button..
     - The app retrieves the stored keys and decrypts the text.
 
 ## File Structure
