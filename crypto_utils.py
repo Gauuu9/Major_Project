@@ -13,18 +13,18 @@ from tkinter import messagebox
 
 def get_quantum_random_number():
     try:
-        response = requests.get("https://qrng.anu.edu.au/API/jsonI.php?length=1&type=unit32", timeout=5)
+        response = requests.get("https://qrng.physik.hu-berlin.de/json/uint16", timeout=5)
         response.raise_for_status()
         data = response.json()
-        print("QRNG raw response:", data)
-        if data["success"] and "data" in data:
+        if "data" in data and isinstance(data["data"], list):
             return data["data"][0]
         else:
-            print("QRNG API responded, but no valid data. Falling back to pseudo-random.")
+            print("QRBGS API responded, but no valid data. Falling back to pseudo-random.")
             return secrets.randbits(32)
     except Exception as e:
-        print(f"QRNG failed, falling back to pseudo-random. Reason: {e}")
-        return secrets.randbits(32)  # Fallback to local randomness
+        print(f"QRBGS failed, falling back to pseudo-random. Reason: {e}")
+        return secrets.randbits(32)
+  # Fallback to local randomness
 
 def generate_key(voice_features=""):
     current_time = int(time.time()) + int(time.strftime('%Y%m%d'))
@@ -52,11 +52,7 @@ def encrypt_and_store_key(key):
     with open("file_key.txt", "wb") as file:
         file.write(file_key)
 
-    # Show the ciphertext in a messagebox (if available in the global scope)
-    if hasattr(encrypt_and_store_key, 'last_ciphertext'):
-        messagebox.showinfo("Ciphertext", f"Ciphertext:\n{encrypt_and_store_key.last_ciphertext}")
-    else:
-        messagebox.showinfo("Key Saved", "Key saved in 'encryption_key.enc'\nFile key saved in 'file_key.txt'")
+    messagebox.showinfo("Key Saved", "Key saved in 'encryption_key.enc'\nFile key saved in 'file_key.txt'")
 
 def encrypt_text(plaintext, key):
     cipher = AES.new(key, AES.MODE_GCM)

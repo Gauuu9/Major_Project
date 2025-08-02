@@ -96,7 +96,7 @@ class CryptographyApp:
             device_index = int(self.device_var.get().split(':')[0])
 
         # Optionally, modify get_voice_features to accept device_index
-        voice_features = get_voice_features(device_index) if device_index is not None else get_voice_features()
+        voice_features = get_voice_features() 
         key, _ = generate_key(voice_features)
         encrypted_text = encrypt_text(secret, key)
 
