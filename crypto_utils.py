@@ -36,7 +36,11 @@ def encrypt_and_store_key(key):
     with open("file_key.txt", "wb") as file:
         file.write(file_key)
 
-    messagebox.showinfo("Key Saved", "Key saved in 'encryption_key.enc'\nFile key saved in 'file_key.txt'")
+    # Show the ciphertext in a messagebox (if available in the global scope)
+    if hasattr(encrypt_and_store_key, 'last_ciphertext'):
+        messagebox.showinfo("Ciphertext", f"Ciphertext:\n{encrypt_and_store_key.last_ciphertext}")
+    else:
+        messagebox.showinfo("Key Saved", "Key saved in 'encryption_key.enc'\nFile key saved in 'file_key.txt'")
 
 def encrypt_text(plaintext, key):
     cipher = AES.new(key, AES.MODE_GCM)
