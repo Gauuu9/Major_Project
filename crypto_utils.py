@@ -5,18 +5,34 @@ import hashlib
 import time
 import uuid
 import secrets
+import requests
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from cryptography.fernet import Fernet
 from tkinter import messagebox
 
+def get_quantum_random_number():
+    try:
+        response = requests.get("https://qrng.anu.edu.au/API/jsonI.php?length=1&type=unit32", timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        print("QRNG raw response:", data)
+        if data["success"] and "data" in data:
+            return data["data"][0]
+        else:
+            print("QRNG API responded, but no valid data. Falling back to pseudo-random.")
+            return secrets.randbits(32)
+    except Exception as e:
+        print(f"QRNG failed, falling back to pseudo-random. Reason: {e}")
+        return secrets.randbits(32)  # Fallback to local randomness
+
 def generate_key(voice_features=""):
     current_time = int(time.time()) + int(time.strftime('%Y%m%d'))
     system_entropy = int(hashlib.sha256(str(uuid.getnode()).encode()).hexdigest(), 16)
-    jitter = secrets.randbits(32)
+    quantum_entropy = get_quantum_random_number()
     salt = secrets.token_bytes(16)
 
-    seed = current_time ^ system_entropy ^ jitter
+    seed = current_time ^ system_entropy ^ quantum_entropy
 
     if voice_features:
         seed ^= int(hashlib.blake2b(voice_features.encode()).hexdigest(), 16)
