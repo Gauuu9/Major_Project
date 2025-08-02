@@ -41,7 +41,7 @@ def get_voice_features():
     canvas = tk.Canvas(voice_window, width=300, height=100, bg="#ffffff", highlightthickness=1, highlightbackground="#dee2e6")
     canvas.pack(pady=5)
 
-    meter_bar = canvas.create_rectangle(0, 100, 0, 0, fill="#0d6efd", outline="")
+    meter_bar = canvas.create_rectangle(0, 100, 0, 0, fill="#00d420", outline="")
 
     # Button to start recording
     record_btn = tk.Button(voice_window, text="Start Recording", font=("Segoe UI", 12), bg="#0d6efd", fg="white")
