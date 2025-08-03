@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import pyaudio
 from audio_utils import get_voice_features
-from crypto_utils import generate_key, encrypt_and_store_key, encrypt_text, load_key, decrypt_text
+from crypto_utils import generate_key, encrypt_and_store_key, encrypt_text, decrypt_text
 
 class CryptographyApp:
     def __init__(self, root):
@@ -45,6 +45,7 @@ class CryptographyApp:
         self.device_dropdown.pack(side=tk.LEFT, padx=5)
         self.device_dropdown.configure(style="TCombobox")
         self.populate_input_devices()
+
     def populate_input_devices(self):
         p = pyaudio.PyAudio()
         devices = []
@@ -90,13 +91,8 @@ class CryptographyApp:
             messagebox.showwarning("Warning", "No text to encrypt!")
             return
 
-        # Pass selected device index to get_voice_features if needed
-        device_index = None
-        if self.device_var.get():
-            device_index = int(self.device_var.get().split(':')[0])
-
-        # Optionally, modify get_voice_features to accept device_index
-        voice_features = get_voice_features(device_index) if device_index is not None else get_voice_features()
+        # get_voice_features does not accept device_index, so just call it
+        voice_features = get_voice_features()
         key, _ = generate_key(voice_features)
         encrypted_text = encrypt_text(secret, key)
 
@@ -112,11 +108,39 @@ class CryptographyApp:
         if not encrypted:
             messagebox.showwarning("Warning", "No text to decrypt!")
             return
-        try:
-            key = load_key()
-            decrypted = decrypt_text(encrypted, key)
-            self.text_box.delete(1.0, tk.END)
-            self.text_box.insert(tk.END, decrypted)
-            messagebox.showinfo("Success", "Decryption Complete!")
-        except Exception as e:
-            messagebox.showerror("Error", f"Decryption failed: {e}")
+
+        # Pop up to request file_key value
+        def on_submit():
+            user_key = entry.get().strip()
+            try:
+                with open("file_key.txt", "r") as f:
+                    actual_key = f.read().strip()
+                if user_key != actual_key:
+                    messagebox.showerror("Error", "File key does not match! Decryption aborted.")
+                    popup.destroy()
+                    return
+                from crypto_utils import load_key_from_filekey, decrypt_text
+                aes_key = load_key_from_filekey(user_key)
+                if not aes_key:
+                    messagebox.showerror("Error", "Invalid file key format.")
+                    popup.destroy()
+                    return
+                decrypted = decrypt_text(encrypted, aes_key)
+                self.text_box.delete(1.0, tk.END)
+                self.text_box.insert(tk.END, decrypted)
+                messagebox.showinfo("Success", "Decryption Complete!")
+                popup.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", f"Decryption failed: {e}")
+                popup.destroy()
+
+        popup = tk.Toplevel(self.root)
+        popup.title("Enter File Key")
+        popup.geometry("400x150")
+        popup.configure(bg="#f8f9fa")
+        tk.Label(popup, text="Enter the file_key value:", bg="#f8f9fa", font=("Segoe UI", 11)).pack(pady=10)
+        entry = tk.Entry(popup, show="*", font=("Segoe UI", 12), width=40)
+        entry.pack(pady=5)
+        submit_btn = tk.Button(popup, text="Submit", font=("Segoe UI", 11), bg="#0d6efd", fg="white", command=on_submit)
+        submit_btn.pack(pady=10)
+        entry.focus_set()

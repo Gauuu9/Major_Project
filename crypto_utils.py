@@ -25,22 +25,13 @@ def generate_key(voice_features=""):
     return key, salt
 
 def encrypt_and_store_key(key):
-    file_key = Fernet.generate_key()
-    cipher = Fernet(file_key)
-
-    encrypted_key = cipher.encrypt(key.hex().encode())
-
-    with open("encryption_key.enc", "wb") as key_file:
-        key_file.write(encrypted_key)
-
-    with open("file_key.txt", "wb") as file:
-        file.write(file_key)
-
-    # Show the ciphertext in a messagebox (if available in the global scope)
+    # Store the AES key as hex in file_key.txt
+    with open("file_key.txt", "w") as file:
+        file.write(key.hex())
     if hasattr(encrypt_and_store_key, 'last_ciphertext'):
         messagebox.showinfo("Ciphertext", f"Ciphertext:\n{encrypt_and_store_key.last_ciphertext}")
     else:
-        messagebox.showinfo("Key Saved", "Key saved in 'encryption_key.enc'\nFile key saved in 'file_key.txt'")
+        messagebox.showinfo("Key Saved", "File key saved in 'file_key.txt'")
 
 def encrypt_text(plaintext, key):
     cipher = AES.new(key, AES.MODE_GCM)
@@ -49,17 +40,14 @@ def encrypt_text(plaintext, key):
     encrypted = base64.b64encode(cipher.nonce + tag + ciphertext).decode()
     return encrypted
 
+
 # --- Decryption Utilities ---
-def load_key():
-    """Load the Fernet key and decrypt the AES key from files."""
-    with open("file_key.txt", "rb") as f:
-        file_key = f.read()
-    cipher = Fernet(file_key)
-    with open("encryption_key.enc", "rb") as f:
-        encrypted_key = f.read()
-    key_hex = cipher.decrypt(encrypted_key)
-    key = bytes.fromhex(key_hex.decode())
-    return key
+def load_key_from_filekey(file_key_value):
+    """Load the AES key from user input (file_key_value as hex string)."""
+    try:
+        return bytes.fromhex(file_key_value)
+    except Exception:
+        return None
 
 def decrypt_text(encrypted, key):
     """Decrypt a base64-encoded AES-GCM encrypted message."""
